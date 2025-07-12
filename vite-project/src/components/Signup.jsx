@@ -1,8 +1,67 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Signup() {
-  // Canvas Snowfall Effect
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Handle input change
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  // Submit handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const { name, username, email, password, confirmPassword } = formData;
+
+    if (!name || !username || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.msg || "Registration failed");
+        return;
+      }
+
+      setSuccess("Registration successful!");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (err) {
+      setError("Server error");
+    }
+  };
+
+  // Snowfall effect
   useEffect(() => {
     const canvas = document.getElementById("snow-canvas");
     const ctx = canvas.getContext("2d");
@@ -67,34 +126,48 @@ export default function Signup() {
         <h1 className="text-3xl font-bold text-center text-white mb-6">
           Create Account
         </h1>
-        <form className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label
-              className="block text-white text-sm font-medium mb-1"
-              htmlFor="name"
-            >
+            <label className="block text-white text-sm font-medium mb-1">
               Name
             </label>
             <input
               type="text"
-              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               placeholder="John Doe"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+          </div>
+
+          {/* Username */}
+          <div>
+            <label className="block text-white text-sm font-medium mb-1">
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="johndoe123"
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label
-              className="block text-white text-sm font-medium mb-1"
-              htmlFor="email"
-            >
+            <label className="block text-white text-sm font-medium mb-1">
               Email
             </label>
             <input
               type="email"
-              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="you@example.com"
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
@@ -102,15 +175,14 @@ export default function Signup() {
 
           {/* Password */}
           <div>
-            <label
-              className="block text-white text-sm font-medium mb-1"
-              htmlFor="password"
-            >
+            <label className="block text-white text-sm font-medium mb-1">
               Password
             </label>
             <input
               type="password"
-              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               placeholder="••••••••"
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
@@ -118,19 +190,22 @@ export default function Signup() {
 
           {/* Confirm Password */}
           <div>
-            <label
-              className="block text-white text-sm font-medium mb-1"
-              htmlFor="confirm-password"
-            >
+            <label className="block text-white text-sm font-medium mb-1">
               Confirm Password
             </label>
             <input
               type="password"
-              id="confirm-password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
               placeholder="••••••••"
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
           </div>
+
+          {/* Error or Success */}
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {success && <p className="text-green-400 text-sm">{success}</p>}
 
           {/* Submit button */}
           <button
@@ -140,6 +215,7 @@ export default function Signup() {
             Sign Up
           </button>
         </form>
+
         {/* Extra Links */}
         <p className="mt-4 text-center text-sm text-gray-300">
           Already have an account?{" "}
