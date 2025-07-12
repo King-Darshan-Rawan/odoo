@@ -8,7 +8,7 @@ import path from 'path';
 import userRoutes from './routes/User.js';
 import swapRoutes from './routes/Swap.js';
 import messageRoutes from './routes/Message.js';
-import profileRoutes from './routes/Profile.js';
+import profileRoutes from './routes/profile.js';
 
 dotenv.config();
 

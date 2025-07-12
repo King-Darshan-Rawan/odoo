@@ -13,9 +13,12 @@ const userSchema = new mongoose.Schema({
   },
   skillsOffered: [String],
   skillsWanted: [String],
+  availability: String,           // ✅ ADD THIS
+  photo: String,                  // ✅ ADD THIS
   isAdmin: { type: Boolean, default: false },
   isBanned: { type: Boolean, default: false }
 });
+
 
 // ✅ Fix OverwriteModelError (reuse existing model if already compiled)
 const User = mongoose.models.User || mongoose.model('User', userSchema);
