@@ -1,13 +1,16 @@
-import express from 'express';
-import { getUsers, getUser, updateUser, addSkill, removeSkill, banUser } from '../controllers/User.js';
+import {Router} from "express";
+import { getUsers, getUser, updateUser, addSkill, removeSkill, banUser , deleteUser } from '../controllers/User.js';
+import {authMiddleware} from '../middleware/auth.js';
 
-const router = express.Router();
 
-router.get('/', getUsers);
-router.get('/:userId', getUser);
-router.post('/', updateUser);
-router.post('/:userId/skills', addSkill);
-router.delete('/:userId/skills', removeSkill);
-router.patch('/:userId/ban', banUser);
+const router = Router();
+
+router.route('/').get(getUsers);
+router.route('/:userId').get(getUser);
+router.route('/').post(updateUser);
+router.route('/:userId/skills').post(addSkill);
+router.route('/:userId/skills').delete(removeSkill);
+router.route('/:userId/ban').patch(banUser);
+router.route('/:userId').delete(authMiddleware,deleteUser);
 
 export default router;

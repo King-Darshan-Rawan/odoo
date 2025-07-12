@@ -1,10 +1,11 @@
-import express from 'express';
+import {Router} from "express";
 import { getSwaps, createSwap, updateSwap } from '../controllers/Swap.js';
 
-const router = express.Router();
 
-router.get('/', getSwaps);
-router.post('/', createSwap);
-router.patch('/:swapId', updateSwap);
+const router = Router();
+
+router.route('/').get(getSwaps);
+router.route('/').post(createSwap);
+router.route('/:swapId').patch(updateSwap);
 
 export default router;

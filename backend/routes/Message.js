@@ -1,8 +1,11 @@
-import express from 'express';
+import {Router} from "express";
 import { createMessage } from '../controllers/Message.js';
+import {authMiddleware} from '../middleware/auth.js';
 
-const router = express.Router();
 
-router.post('/', createMessage);
+
+const router = Router();
+
+router.route('/').post(authMiddleware,createMessage);
 
 export default router;
