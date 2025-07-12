@@ -1,0 +1,153 @@
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+
+export default function Signup() {
+  // Canvas Snowfall Effect
+  useEffect(() => {
+    const canvas = document.getElementById("snow-canvas");
+    const ctx = canvas.getContext("2d");
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    let snowflakes = Array.from({ length: 150 }).map(() => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 4 + 1,
+      d: Math.random() * 100,
+    }));
+
+    function drawSnowflakes() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      snowflakes.forEach((flake) => {
+        ctx.moveTo(flake.x, flake.y);
+        ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2, true);
+      });
+      ctx.fill();
+      moveSnowflakes();
+    }
+
+    let angle = 0;
+    function moveSnowflakes() {
+      angle += 0.01;
+      snowflakes.forEach((flake) => {
+        flake.y += Math.cos(angle + flake.d) + 1 + flake.r / 2;
+        flake.x += Math.sin(angle) * 2;
+
+        if (flake.y > height) {
+          flake.y = 0;
+          flake.x = Math.random() * width;
+        }
+      });
+    }
+
+    function update() {
+      drawSnowflakes();
+      requestAnimationFrame(update);
+    }
+
+    update();
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+  }, []);
+
+  return (
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900">
+      {/* Snowfall canvas */}
+      <canvas
+        id="snow-canvas"
+        className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      />
+
+      {/* Signup card */}
+      <div className="backdrop-blur-md bg-white/10 rounded-2xl shadow-lg p-8 w-full max-w-md mx-4 z-10">
+        <h1 className="text-3xl font-bold text-center text-white mb-6">
+          Create Account
+        </h1>
+        <form className="space-y-4">
+          {/* Name */}
+          <div>
+            <label
+              className="block text-white text-sm font-medium mb-1"
+              htmlFor="name"
+            >
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              placeholder="John Doe"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label
+              className="block text-white text-sm font-medium mb-1"
+              htmlFor="email"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              placeholder="you@example.com"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label
+              className="block text-white text-sm font-medium mb-1"
+              htmlFor="password"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••••"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label
+              className="block text-white text-sm font-medium mb-1"
+              htmlFor="confirm-password"
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirm-password"
+              placeholder="••••••••"
+              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+          </div>
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md transition duration-300"
+          >
+            Sign Up
+          </button>
+        </form>
+        {/* Extra Links */}
+        <p className="mt-4 text-center text-sm text-gray-300">
+          Already have an account?{" "}
+          <Link to="/login" className="text-purple-400 hover:underline">
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
