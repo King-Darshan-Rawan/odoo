@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Snowfall from "react-snowfall";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -8,9 +10,6 @@ export default function Login() {
     email: "",
     password: "",
   });
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -21,18 +20,16 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     const { email, password } = formData;
 
     if (!email || !password) {
-      setError("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -41,45 +38,48 @@ export default function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.msg || "Login failed");
+        toast.error(data.msg || "Login failed");
         return;
       }
 
-      setSuccess("Login successful!");
+      // Store token & userId
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.userId);
 
-      setTimeout(() => navigate("/dashboard"), 1000); // Navigate to dashboard
+      toast.success("Login successful!");
+
+      // Redirect based on profile completeness
+      setTimeout(() => {
+        if (data.isProfileComplete) {
+          navigate("/dashboard");
+        } else {
+          toast.info("Please complete your profile");
+          navigate("/complete-profile");
+        }
+      }, 1000);
     } catch (err) {
-      setError("Server error");
+      console.error(err);
+      toast.error("Server error");
     }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900">
-      {/* Snowfall background */}
+      {/* Snowfall */}
       <Snowfall
-        snowflakeCount={200}
-        style={{
-          position: "fixed",
-          width: "100vw",
-          height: "100vh",
-        }}
-        color="white"
+        snowflakeCount={150}
+        style={{ position: "fixed", width: "100vw", height: "100vh" }}
       />
 
-      {/* Login card */}
+      {/* Login Card */}
       <div className="backdrop-blur-md bg-white/10 rounded-2xl shadow-lg p-8 w-full max-w-md mx-4">
         <h1 className="text-3xl font-bold text-center text-white mb-6">
           Welcome Back
         </h1>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">
-              Email
-            </label>
+            <label className="block text-white text-sm mb-1">Email</label>
             <input
               type="email"
               name="email"
@@ -89,12 +89,9 @@ export default function Login() {
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
           </div>
-
           {/* Password */}
           <div>
-            <label className="block text-white text-sm font-medium mb-1">
-              Password
-            </label>
+            <label className="block text-white text-sm mb-1">Password</label>
             <input
               type="password"
               name="password"
@@ -104,12 +101,7 @@ export default function Login() {
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
           </div>
-
-          {/* Error or Success */}
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          {success && <p className="text-green-400 text-sm">{success}</p>}
-
-          {/* Submit button */}
+          {/* Submit */}
           <button
             type="submit"
             className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md transition duration-300"
@@ -117,8 +109,7 @@ export default function Login() {
             Login
           </button>
         </form>
-
-        {/* Extra Links */}
+        {/* Link to signup */}
         <p className="mt-4 text-center text-sm text-gray-300">
           Don’t have an account?{" "}
           <Link to="/signup" className="text-purple-400 hover:underline">
