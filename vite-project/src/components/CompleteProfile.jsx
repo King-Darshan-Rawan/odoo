@@ -14,25 +14,48 @@ export default function CompleteProfile() {
     isPublic: true,
   });
 
-  const skills = [
-    "JavaScript", "Python", "Photoshop", "Excel", "Graphic Design", "React",
-  ];
+  const [newSkillOffered, setNewSkillOffered] = useState("");
+  const [newSkillWanted, setNewSkillWanted] = useState("");
 
-  const toggleSkill = (skill, type) => {
-    setFormData((prev) => {
-      const arr = [...prev[type]];
-      const idx = arr.indexOf(skill);
-      if (idx >= 0) arr.splice(idx, 1);
-      else arr.push(skill);
-      return { ...prev, [type]: arr };
-    });
+  const addSkill = (skill, type) => {
+    if (skill && !formData[type].includes(skill)) {
+      setFormData((prev) => ({
+        ...prev,
+        [type]: [...prev[type], skill],
+      }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const removeSkill = (skill, type) => {
+    setFormData((prev) => ({
+      ...prev,
+      [type]: prev[type].filter((s) => s !== skill),
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Profile saved:", formData);
-    // TODO: send formData to backend API
-    navigate("/dashboard");
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("location", formData.location);
+    if (formData.photo) {
+      data.append("photo", formData.photo);
+    }
+    data.append("skillsOffered", JSON.stringify(formData.skillsOffered));
+    data.append("skillsWanted", JSON.stringify(formData.skillsWanted));
+    data.append("availability", formData.availability);
+    data.append("isPublic", formData.isPublic);
+
+    const response = await fetch("/api/profile/complete-profile", {
+      method: "POST",
+      body: data,
+    });
+
+    if (response.ok) {
+      navigate("/dashboard");
+    } else {
+      console.error("Failed to save profile");
+    }
   };
 
   useEffect(() => {
@@ -88,13 +111,11 @@ export default function CompleteProfile() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-900 via-purple-900 to-gray-900">
-      {/* Snowfall canvas */}
       <canvas
         id="snow-canvas"
         className="fixed inset-0 w-full h-full pointer-events-none z-0"
       />
 
-      {/* Profile Form */}
       <div className="backdrop-blur-md bg-white/10 rounded-2xl shadow-lg p-8 w-full max-w-lg mx-4 z-10">
         <h1 className="text-3xl font-bold text-center text-white mb-6">
           Complete Your Profile
@@ -143,20 +164,34 @@ export default function CompleteProfile() {
           {/* Skills Offered */}
           <div>
             <label className="block text-sm mb-1">Skills Offered</label>
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <button
-                  type="button"
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newSkillOffered}
+                onChange={(e) => setNewSkillOffered(e.target.value)}
+                placeholder="Add a skill"
+                className="flex-1 px-3 py-2 rounded-lg bg-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  addSkill(newSkillOffered, "skillsOffered");
+                  setNewSkillOffered("");
+                }}
+                className="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.skillsOffered.map((skill) => (
+                <span
                   key={skill}
-                  onClick={() => toggleSkill(skill, "skillsOffered")}
-                  className={`px-3 py-1 rounded-full border ${
-                    formData.skillsOffered.includes(skill)
-                      ? "bg-purple-600 border-purple-400"
-                      : "bg-white/20 border-gray-400"
-                  }`}
+                  onClick={() => removeSkill(skill, "skillsOffered")}
+                  className="px-3 py-1 bg-purple-600 rounded-full text-sm cursor-pointer"
                 >
-                  {skill}
-                </button>
+                  {skill} ✕
+                </span>
               ))}
             </div>
           </div>
@@ -164,20 +199,34 @@ export default function CompleteProfile() {
           {/* Skills Wanted */}
           <div>
             <label className="block text-sm mb-1">Skills Wanted</label>
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <button
-                  type="button"
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newSkillWanted}
+                onChange={(e) => setNewSkillWanted(e.target.value)}
+                placeholder="Add a skill"
+                className="flex-1 px-3 py-2 rounded-lg bg-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  addSkill(newSkillWanted, "skillsWanted");
+                  setNewSkillWanted("");
+                }}
+                className="px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg"
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.skillsWanted.map((skill) => (
+                <span
                   key={skill}
-                  onClick={() => toggleSkill(skill, "skillsWanted")}
-                  className={`px-3 py-1 rounded-full border ${
-                    formData.skillsWanted.includes(skill)
-                      ? "bg-green-600 border-green-400"
-                      : "bg-white/20 border-gray-400"
-                  }`}
+                  onClick={() => removeSkill(skill, "skillsWanted")}
+                  className="px-3 py-1 bg-green-600 rounded-full text-sm cursor-pointer"
                 >
-                  {skill}
-                </button>
+                  {skill} ✕
+                </span>
               ))}
             </div>
           </div>
@@ -191,8 +240,15 @@ export default function CompleteProfile() {
               className="w-full px-4 py-2 rounded-lg bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
             >
               <option value="weekends">Weekends</option>
-              <option value="evenings">Evenings</option>
               <option value="weekdays">Weekdays</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+              <option value="sunday">Sunday</option>
+              <option value="all_days">All Days</option>
             </select>
           </div>
 

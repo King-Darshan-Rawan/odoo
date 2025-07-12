@@ -12,6 +12,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/profile_pics", express.static("public/profile_pics"));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
