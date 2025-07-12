@@ -56,7 +56,7 @@ export default function CompleteProfile() {
   data.append("isPublic", formData.isPublic);
 
   try {
-    const response = await fetch("http://localhost:3001/api/profile/complete-profile", {
+    const response = await fetch("http://localhost:3001/complete-profile", {
       method: "POST",
       body: data,
     });
