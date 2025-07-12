@@ -2,9 +2,9 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import userRoutes from './routes/userRoutes.js';
-import swapRoutes from './routes/swapRoutes.js';
-import messageRoutes from './routes/messageRoutes.js';
+import userRoutes from './routes/User.js';
+import swapRoutes from './routes/Swap.js';
+import messageRoutes from './routes/Message.js';
 import jwt from 'jsonwebtoken';
 
 dotenv.config();
