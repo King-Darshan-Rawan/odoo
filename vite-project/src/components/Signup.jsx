@@ -23,43 +23,48 @@ export default function Signup() {
   };
 
   // Submit handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    const { name, username, email, password, confirmPassword } = formData;
+  const { name, username, email, password, confirmPassword } = formData;
 
-    if (!name || !username || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+  if (!name || !username || !email || !password || !confirmPassword) {
+    toast.error("Please fill in all fields");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    toast.error("Passwords do not match");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, username, email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data.msg || "Registration failed");
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+    toast.success("Registration successful!");
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("userId", data.userId);
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username, email, password }),
-      });
+    setTimeout(() => navigate("/complete-profile"), 1500);
+  } catch (err) {
+    console.error(err);
+    toast.error("Server error");
+  }
+};
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.msg || "Registration failed");
-        return;
-      }
-
-      setSuccess("Registration successful!");
-      setTimeout(() => navigate("/login"), 1500);
-    } catch (err) {
-      setError("Server error");
-    }
-  };
 
   // Snowfall effect
   useEffect(() => {
