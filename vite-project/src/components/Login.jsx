@@ -29,13 +29,14 @@ export default function Login() {
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+      const res = await fetch(`http://localhost:3001/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (!res.ok) {
         toast.error(data.msg || "Login failed");

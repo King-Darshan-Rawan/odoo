@@ -41,14 +41,14 @@ export default function Signup() {
   }
 
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+    const res = await fetch("http://localhost:3001/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, username, email, password }),
     });
-
+console.log(res);
     const data = await res.json();
-
+    console.log(data);
     if (!res.ok) {
       toast.error(data.msg || "Registration failed");
       return;
@@ -60,7 +60,7 @@ export default function Signup() {
 
     setTimeout(() => navigate("/complete-profile"), 1500);
   } catch (err) {
-    console.error(err);
+    console.error(err.message);
     toast.error("Server error");
   }
 };

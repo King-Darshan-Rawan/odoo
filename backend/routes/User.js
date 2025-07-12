@@ -6,7 +6,7 @@ import {authMiddleware} from '../middleware/auth.js';
 const router = Router();
 
 router.route('/register').post(register);
-router.route('/login').get(login);
+router.route('/login').post(login);
 
 router.route('/').get(getUsers);
 router.route('/:userId').get(getUser);
