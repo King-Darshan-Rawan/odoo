@@ -6,6 +6,11 @@ import userRoutes from './routes/userRoutes.js';
 import swapRoutes from './routes/swapRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import jwt from 'jsonwebtoken';
+import userRoutes from './routes/User.js';
+import swapRoutes from './routes/Swap.js';
+import messageRoutes from './routes/Message.js';
+
+
 
 dotenv.config();
 const app = express();
@@ -20,7 +25,6 @@ mongoose.connect(process.env.MONGODB_URI, {
   useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
-
 
 // Routes
 app.use(userRoutes);
