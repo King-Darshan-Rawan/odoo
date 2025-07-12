@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ export default function Signup() {
   };
 
   // Submit handler
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
   setSuccess("");
@@ -46,9 +48,10 @@ export default function Signup() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, username, email, password }),
     });
-console.log(res);
+
     const data = await res.json();
     console.log(data);
+
     if (!res.ok) {
       toast.error(data.msg || "Registration failed");
       return;
@@ -58,7 +61,7 @@ console.log(res);
     localStorage.setItem("token", data.token);
     localStorage.setItem("userId", data.userId);
 
-    setTimeout(() => navigate("/complete-profile"), 1500);
+    navigate("/complete-profile"); // ✅ Navigate instantly
   } catch (err) {
     console.error(err.message);
     toast.error("Server error");

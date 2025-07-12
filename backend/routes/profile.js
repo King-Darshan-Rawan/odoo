@@ -1,48 +1,58 @@
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const User = require("../models/User"); // MongoDB User model
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import User from '../models/User.js';
 
 const router = express.Router();
 
+// Ensure upload folder exists
+const uploadDir = path.join('public', 'profile_pics');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Multer storage config
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/profile_pics"); // save in public/profile_pics
-  },
-  filename: function (req, file, cb) {
-    const username = req.body.name.toLowerCase().replace(/\s+/g, "_"); // john doe -> john_doe
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const username = req.body.name.toLowerCase().replace(/\s+/g, "_");
     const ext = path.extname(file.originalname);
-    cb(null, `${username}${ext}`); // john_doe.png
+    cb(null, `${username}${ext}`);
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-router.post("/complete-profile", upload.single("photo"), async (req, res) => {
+// ✅ UPDATE PROFILE (not create new user)
+router.post('/complete-profile', upload.single('photo'), async (req, res) => {
   try {
-    let photoUrl = "";
-    if (req.file) {
-      photoUrl = `/profile_pics/${req.file.filename}`;
-    }
+    const userId = req.body.userId; // Get from frontend
+    if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-    const user = new User({
-      name: req.body.name,
-      location: req.body.location,
-      photo: photoUrl,
-      skillsOffered: JSON.parse(req.body.skillsOffered),
-      skillsWanted: JSON.parse(req.body.skillsWanted),
-      availability: req.body.availability,
-      isPublic: req.body.isPublic === "true",
-    });
+    const photoUrl = req.file ? `/profile_pics/${req.file.filename}` : '';
 
-    await user.save();
-    res.status(201).json({ message: "Profile created", user });
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        'profile.name': req.body.name,
+        'profile.location': req.body.location,
+        'profile.isPublic': req.body.isPublic === 'true',
+        photo: photoUrl,
+        skillsOffered: JSON.parse(req.body.skillsOffered || '[]'),
+        skillsWanted: JSON.parse(req.body.skillsWanted || '[]'),
+        availability: req.body.availability,
+      },
+      { new: true } // Return updated user
+    );
+
+    if (!updatedUser) return res.status(404).json({ error: 'User not found' });
+
+    res.status(200).json({ message: 'Profile updated', user: updatedUser });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to save profile" });
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 });
 
-module.exports = router;
+export default router;

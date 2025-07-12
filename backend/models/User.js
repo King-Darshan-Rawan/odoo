@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   isBanned: { type: Boolean, default: false }
 });
 
-const User =  mongoose.model('User', userSchema);
+// ✅ Fix OverwriteModelError (reuse existing model if already compiled)
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export default User;

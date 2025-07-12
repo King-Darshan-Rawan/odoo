@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
 export default function CompleteProfile() {
   const navigate = useNavigate();
 
@@ -34,29 +34,26 @@ export default function CompleteProfile() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("location", formData.location);
-    if (formData.photo) {
-      data.append("photo", formData.photo);
-    }
-    data.append("skillsOffered", JSON.stringify(formData.skillsOffered));
-    data.append("skillsWanted", JSON.stringify(formData.skillsWanted));
-    data.append("availability", formData.availability);
-    data.append("isPublic", formData.isPublic);
+  const data = new FormData();
 
-    const response = await fetch("/api/profile/complete-profile", {
-      method: "POST",
-      body: data,
-    });
+const userId = localStorage.getItem("userId"); // Get userId from localStorage
+if (!userId) {
+  toast.error("User not logged in");
+  return;
+}
 
-    if (response.ok) {
-      navigate("/dashboard");
-    } else {
-      console.error("Failed to save profile");
-    }
-  };
+data.append("userId", userId); // Send userId to backend
+data.append("name", formData.name);
+data.append("location", formData.location);
+if (formData.photo) {
+  data.append("photo", formData.photo);
+}
+data.append("skillsOffered", JSON.stringify(formData.skillsOffered));
+data.append("skillsWanted", JSON.stringify(formData.skillsWanted));
+data.append("availability", formData.availability);
+data.append("isPublic", formData.isPublic);
+
+};
 
   useEffect(() => {
     const canvas = document.getElementById("snow-canvas");
