@@ -8,7 +8,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import CompleteProfile from "./components/CompleteProfile";
 import Dashboard from "./pages/Dashboard";
-
+import Requests from "./pages/Requests";
 function App() {
   const [user, setUser] = useState(null); // hold user data if logged in
 
@@ -56,6 +56,7 @@ function App() {
         <Route path="/signup" element={<Signup setUser={setUser} />} />
         <Route path="/complete-profile" element={<CompleteProfile user={user} />} />
         <Route path="/dashboard" element={<Dashboard user={user} />} />
+        <Route path="/requests" element={<Requests />} />
       </Routes>
     </Router>
   );

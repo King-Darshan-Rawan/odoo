@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null); // For popup
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const canvas = document.getElementById("snow-canvas");
@@ -35,7 +38,6 @@ export default function Dashboard() {
       snowflakes.forEach((flake) => {
         flake.y += Math.cos(angle + flake.d) + 1 + flake.r / 2;
         flake.x += Math.sin(angle) * 2;
-
         if (flake.y > height) {
           flake.y = 0;
           flake.x = Math.random() * width;
@@ -56,31 +58,31 @@ export default function Dashboard() {
 
     fetch("http://localhost:3001/")
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch users");
-        }
+        if (!res.ok) throw new Error("Failed to fetch users");
         return res.json();
       })
       .then((data) => setUsers(data))
       .catch((err) => console.error("Error fetching users:", err));
   }, []);
 
-  const openPopup = (user) => {
-    setSelectedUser(user);
-  };
-
-  const closePopup = () => {
-    setSelectedUser(null);
-  };
+  const openPopup = (user) => setSelectedUser(user);
+  const closePopup = () => setSelectedUser(null);
 
   const sendRequest = () => {
     alert(`Request sent to ${selectedUser.profile.name}`);
     closePopup();
   };
 
+  const logout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    alert("Logged out!");
+    window.location.href = "/"; // Or navigate("/login");
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-900 text-white">
-      {/* Snowfall canvas */}
+      {/* Snowfall */}
       <canvas
         id="snow-canvas"
         className="fixed inset-0 w-full h-full pointer-events-none z-0"
@@ -89,13 +91,32 @@ export default function Dashboard() {
       {/* Header */}
       <header className="flex justify-between items-center px-6 py-4 bg-gray-800 bg-opacity-50 rounded-b-xl z-10 relative">
         <h1 className="text-2xl font-bold">Skill Swap Platform</h1>
-        <div className="flex gap-6 items-center">
-          <h2 className="text-lg underline">Swap Requests</h2>
+        <div className="relative">
           <img
             src="https://i.pravatar.cc/40"
             alt="Profile"
-            className="w-10 h-10 rounded-full border-2 border-white"
+            className="w-10 h-10 rounded-full border-2 border-white cursor-pointer"
+            onClick={() => setShowMenu(!showMenu)}
           />
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded shadow-lg z-50">
+              <button
+                onClick={() => {
+                  navigate("/requests");
+                  setShowMenu(false);
+                }}
+                className="block px-4 py-2 w-full text-left hover:bg-gray-600"
+              >
+                All Requests
+              </button>
+              <button
+                onClick={logout}
+                className="block px-4 py-2 w-full text-left hover:bg-gray-600"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -158,31 +179,26 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <button
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
-                onClick={() => openPopup(user)}
-              >
-                Request
-              </button>
-            </div>
+            <button
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg"
+              onClick={() => openPopup(user)}
+            >
+              Request
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Popup Modal */}
+      {/* Request Popup */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-gray-800 rounded-lg p-6 relative max-w-md w-full">
-            {/* Close Button */}
             <button
               className="absolute top-2 right-2 text-white text-2xl"
               onClick={closePopup}
             >
               &times;
             </button>
-
-            {/* User Details */}
             <div className="flex flex-col items-center gap-4">
               {selectedUser.photo ? (
                 <img
@@ -195,9 +211,7 @@ export default function Dashboard() {
                   No Photo
                 </div>
               )}
-              <h3 className="text-xl font-bold">
-                {selectedUser.profile.name}
-              </h3>
+              <h3 className="text-xl font-bold">{selectedUser.profile.name}</h3>
               <p className="text-gray-300">{selectedUser.profile.location}</p>
               <p className="text-green-400">
                 Skills Offered:{" "}
