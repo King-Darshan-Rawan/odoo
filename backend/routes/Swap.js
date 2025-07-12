@@ -4,8 +4,8 @@ import { getSwaps, createSwap, updateSwap } from '../controllers/Swap.js';
 
 const router = Router();
 
-router.route('/').get(getSwaps);
-router.route('/').post(createSwap);
-router.route('/:swapId').patch(updateSwap);
+router.route('/getrequests').get(getSwaps);
+router.route('/createrequest').post(createSwap);
+router.route('/updaterequest/:swapId').patch(updateSwap);
 
 export default router;
