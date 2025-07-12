@@ -33,27 +33,48 @@ export default function CompleteProfile() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
   const data = new FormData();
 
-const userId = localStorage.getItem("userId"); // Get userId from localStorage
-if (!userId) {
-  toast.error("User not logged in");
-  return;
-}
+  const userId = localStorage.getItem("userId"); // Get userId from localStorage
+  if (!userId) {
+    toast.error("User not logged in");
+    return;
+  }
 
-data.append("userId", userId); // Send userId to backend
-data.append("name", formData.name);
-data.append("location", formData.location);
-if (formData.photo) {
-  data.append("photo", formData.photo);
-}
-data.append("skillsOffered", JSON.stringify(formData.skillsOffered));
-data.append("skillsWanted", JSON.stringify(formData.skillsWanted));
-data.append("availability", formData.availability);
-data.append("isPublic", formData.isPublic);
+  data.append("userId", userId);
+  data.append("name", formData.name);
+  data.append("location", formData.location);
+  if (formData.photo) {
+    data.append("photo", formData.photo);
+  }
+  data.append("skillsOffered", JSON.stringify(formData.skillsOffered));
+  data.append("skillsWanted", JSON.stringify(formData.skillsWanted));
+  data.append("availability", formData.availability);
+  data.append("isPublic", formData.isPublic);
 
+  try {
+    const response = await fetch("http://localhost:3001/api/profile/complete-profile", {
+      method: "POST",
+      body: data,
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      toast.success("Profile completed successfully!");
+      navigate("/dashboard");
+    } else {
+      toast.error(result.msg || "Failed to save profile");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Server error while saving profile");
+  }
 };
+
 
   useEffect(() => {
     const canvas = document.getElementById("snow-canvas");
