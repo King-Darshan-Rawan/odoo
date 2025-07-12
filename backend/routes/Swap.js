@@ -1,5 +1,5 @@
 import express from 'express';
-import { getSwaps, createSwap, updateSwap } from '../controllers/swapController.js';
+import { getSwaps, createSwap, updateSwap } from '../controllers/Swap.js';
 
 const router = express.Router();
 
