@@ -16,7 +16,7 @@ function App() {
     // simulate API check for logged-in user
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/check-session");
+        const res = await fetch("http://localhost:3001");
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
